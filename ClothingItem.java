@@ -6,11 +6,11 @@ public class ClothingItem {
     private String brand;
 
     public ClothingItem(int itemId, String name, String size, double price, String brand) {
-        this.itemId = itemId;
-        this.name = name;
-        this.size = size;
-        this.price = price;
-        this.brand = brand;
+        setItemId(itemId);
+        setName(name);
+        setSize(size);
+        setPrice(price);
+        setBrand(brand);
     }
 
     public ClothingItem() {
@@ -18,51 +18,59 @@ public class ClothingItem {
         this.name = "Unknown Item";
         this.size = "M";
         this.price = 0.0;
-        this.brand = "Generic";
+        this.brand = "No brand";
     }
+// getters
+    public int getItemId() {return itemId;}
+    public String getFormattedPrice() {return String.format("%.2f KZT", price);}
+    public String getName() {return name;}
+    public String getSize() {return size;}
+    public double getPrice() {return price;}
+    public String getBrand() {return brand;}
 
-    public int getItemId() {
-        return itemId;
-    }
+
+// Setters
 
     public void setItemId(int itemId) {
-        this.itemId = itemId;
-    }
-
-    public String getName() {
-        return name;
+        if (itemId >=1) {this.itemId = itemId;}
+        else{System.out.println("Warning: itemId cannot be negative!");
+            this.itemId = 0;
+        }
     }
 
     public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSize() {
-        return size;
+        if (name != null && !name.trim().isEmpty()){this.name = name;}
+        else{ System.out.println("Warning: Name cannot be empty!");
+            this.name = "None";
+        }
     }
 
     public void setSize(String size) {
-        this.size = size;
-    }
-
-    public double getPrice() {
-        return price;
+        if (size != null && !size.trim().isEmpty()) { this.size = size;}
+        else {
+            System.out.println("Warning: size cannot be empty!");
+            this.size = "Unknown";
+        }
     }
 
     public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public String getBrand() {
-        return brand;
+        if (price >= 0) {this.price = price;}
+        else {System.out.println("Warning: price cannot be negotive!");
+            this.price = 0;
+        }
     }
 
     public void setBrand(String brand) {
-        this.brand = brand;
+        if (brand != null && !brand.trim().isEmpty()){this.brand = brand;}
+        else {System.out.println("Warning: brand is null!");
+            this.brand = "No Brand";
+        }
     }
 
     public void applyDiscount(double percentage) {
-        this.price = this.price * (1 - percentage / 100);
+        if (percentage >= 0 && percentage<=100){
+        this.price = this.price * (1 - percentage / 100);}
+        else{System.out.println("Invalid discount!");}
     }
 
     public boolean isPremium() {
