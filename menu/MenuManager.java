@@ -18,7 +18,6 @@ public class MenuManager implements Menu {
     private final ClothingItemDAO itemDAO = new ClothingItemDAO();
     private final ArrayList<Order> orders = new ArrayList<>();
     private final ArrayList<Customer> customers = new ArrayList<>(); // Polymorphic list
-    private final ArrayList<ClothingItem> items = new ArrayList<>();
 
     public MenuManager() {
 
@@ -328,9 +327,9 @@ public class MenuManager implements Menu {
         int vipCount = 0;
 
         for (Customer c : customers) {
-            if (c instanceof VIPCustomer) {
+            if (c instanceof VIPCustomer vip) {
                 vipCount++;
-                VIPCustomer vip = (VIPCustomer) c;
+                System.out.println(vip.getName());
 
                 System.out.println(vipCount + ". " + vip.getName() + " (ID: " + vip.getCustomerId() + ")");
                 System.out.println("   VIP Level: " + vip.getVipLevel());
