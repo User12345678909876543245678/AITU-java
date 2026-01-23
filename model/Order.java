@@ -1,3 +1,4 @@
+package model;
 public class Order {
     private int orderId;
     private String customerName;
@@ -29,23 +30,33 @@ public class Order {
 
 
     //SETTERS
-    public void setOrderId(int orderId){
-        if (orderId >=1) {this.orderId = orderId;}
-        else {System.out.println("WARNING: Incorrect order ID!");}
-    }
-    public void setCustomerName(String customerName) {
-        if (customerName != null && !customerName.trim().isEmpty()) {this.customerName = customerName;}
-        else {System.out.println("ALERT: customer's name is empty!");}
-    }
-    public void setTotal(double total) {
-        if (total >= 0){this.total = total;}
-        else {System.out.println("WARNING: total cannot be negative!");}
-    }
-    public void setStatus(String status) {
-        if (status != null && !status.trim().isEmpty()){this.status = status;}
-        else {System.out.println("WARNING: status cannot be empty!");}
+public void setOrderId(int orderId) {
+        if (orderId < 1) {
+            throw new IllegalArgumentException("Order ID must be positive: " + orderId);
+        }
+        this.orderId = orderId;
     }
 
+    public void setCustomerName(String customerName) {
+        if (customerName == null || customerName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer name cannot be empty: " + customerName);
+        }
+        this.customerName = customerName;
+    }
+
+    public void setTotal(double total) {
+        if (total < 0) {
+            throw new IllegalArgumentException("Total cannot be negative: " + total);
+        }
+        this.total = total;
+    }
+
+    public void setStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            throw new IllegalArgumentException("Status cannot be empty: " + status);
+        }
+        this.status = status;
+    }
 
     @Override
     public String toString() {
