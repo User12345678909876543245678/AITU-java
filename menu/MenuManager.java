@@ -133,7 +133,7 @@ public class MenuManager implements Menu {
             String joinDate = scanner.nextLine().trim();
 
             RegularCustomer regularCustomer = new RegularCustomer(customerId, name, age, email, preferredSize, points, joinDate);
-            CustomerDAO.insert(regularCustomer);
+            CustomerDAO.insertRegularCustomer(regularCustomer);
 
             System.out.println("\n✅ Regular Customer added successfully!");
         } catch (NumberFormatException e) {
@@ -166,8 +166,8 @@ public class MenuManager implements Menu {
             System.out.print("Enter VIP level (Gold/Silver): ");
             String vipLevel = scanner.nextLine().trim();
 
-            Customer customer = new VIPCustomer(customerId, name, age, email, preferredSize, points, vipLevel);
-            customers.add(customer);
+            Customer VIP = new VIPCustomer(customerId, name, age, email, preferredSize, points, vipLevel);
+            CustomerDAO.insertVIPCustomer(VIP);
 
             System.out.println("\n✅ VIP Customer added successfully!");
         } catch (NumberFormatException e) {
@@ -349,14 +349,14 @@ public class MenuManager implements Menu {
     }
     private void SearchBySizeRange() {
         try {
-            System.out.println("\n┌─ SEARCH BY SALARY RANGE ───────────────┐");
+            System.out.println("\n┌─ SEARCH BY Size RANGE ───────────────┐");
             System.out.print("│ Enter minimum size: ");
-            String minsize = scanner.nextLine();
+            String minSize = scanner.nextLine();
             System.out.print("│ Enter maximum size: ");
-            String maxsize = scanner.nextLine();
+            String maxSize = scanner.nextLine();
             System.out.println("└────────────────────────────────────────┘");
-            List<Customer> results = customerDAO.SearchBySizeRange(minsize, maxsize);
-            displaySearchResults(results, "Size between: " + minsize + " - " + maxsize);
+            List<Customer> results = customerDAO.SearchBySizeRange(minSize, maxSize);
+            displaySearchResults(results, "Size between: " + minSize + " - " + maxSize);
         } catch (java.util.InputMismatchException e) {
             System.out.println("❌ Error: Invalid size!");
             scanner.nextLine();

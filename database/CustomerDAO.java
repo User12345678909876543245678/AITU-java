@@ -1,215 +1,125 @@
 package database;
 
 import model.*;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CustomerDAO {
+    //INSERT
+    public void insertRegularCustomer(RegularCustomer regularCustomer) {
+        String sql = "INSERT INTO customer (name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, 'Regular', ?, NULL)";
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
 
-    public void insert(ClothingItem item) {
-        String sql = "INSERT INTO clothing_item (name, size, price, brand) VALUES (?, ?, ?, ?)";
-
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setString(1, item.getName());
-            ps.setString(2, item.getSize());
-            ps.setDouble(3, item.getPrice());
-            ps.setString(4, item.getBrand());
-
-            ps.executeUpdate();
-            System.out.println("Item inserted into DB.");
-
-        } catch (SQLException e) {
-            System.out.println("Insert failed: " + e.getMessage());
-        }
-    }
-
-    public ArrayList<ClothingItem> getAll() {
-        ArrayList<ClothingItem> items = new ArrayList<>();
-        String sql = "SELECT item_id, name, size, price, brand FROM clothing_item ORDER BY item_id";
-
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                ClothingItem item = new ClothingItem(
-                        rs.getInt("item_id"),
-                        rs.getString("name"),
-                        rs.getString("size"),
-                        rs.getDouble("price"),
-                        rs.getString("brand")
-                );
-                items.add(item);
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Select failed: " + e.getMessage());
-        }
-        return items;
-    }
-}
-
-
-/**
- * StaffDAO - Week 8 Enhanced
- * Complete CRUD operations + Advanced Search
- * - CREATE (INSERT) ✓
- * - READ (SELECT) ✓
- * - UPDATE ✓ NEW!
- * - DELETE ✓ NEW!
- * - SEARCH by name ✓ NEW!
- * - SEARCH by salary range ✓ NEW!
- */
-public class StaffDAO {
-
-    // ========================================
-    // CREATE - INSERT OPERATIONS (Week 7)
-    // ========================================
-
-    /**
-     * INSERT Chef into database
-     */
-    public boolean insertChef(Chef chef) {
-        String sql = "INSERT INTO staff (name, salary, experience_years, staff_type, specialization, tables_served) " +
-                "VALUES (?, ?, ?, 'CHEF', ?, NULL)";
-
-        Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return false;
-
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, chef.getName());
-            statement.setDouble(2, chef.getSalary());
-            statement.setInt(3, chef.getExperienceYears());
-            statement.setString(4, chef.getSpecialization());
+            statement.setString(1, regularCustomer.getName());
+            statement.setInt(2, regularCustomer.getAge());
+            statement.setString(3, regularCustomer.getEmail());
+            statement.setString(4, regularCustomer.getPreferredSize());
+            statement.setInt(5, regularCustomer.getPoints());
+            statement.setString(6, regularCustomer.getJoinDate());
 
             int rowsInserted = statement.executeUpdate();
             statement.close();
 
             if (rowsInserted > 0) {
-                System.out.println("✅ Chef inserted: " + chef.getName());
-                return true;
+                System.out.println("✅ Regular customer inserted: " + regularCustomer.getName());
             }
-
-        } catch (SQLException e) {
-            System.out.println("❌ Insert Chef failed!");
+        } catch (
+                SQLException e) {
             e.printStackTrace();
         } finally {
             DatabaseConnection.closeConnection(connection);
         }
-
-        return false;
     }
+    public boolean insertVIPCustomer(VIPCustomer VIP) {
+        String sql = "INSERT INTO customer (name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, 'VIP', NULL, ?)";
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
 
-    /**
-     * INSERT Waiter into database
-     */
-    public boolean insertWaiter(Waiter waiter) {
-        String sql = "INSERT INTO staff (name, salary, experience_years, staff_type, specialization, tables_served) " +
-                "VALUES (?, ?, ?, 'WAITER', NULL, ?)";
-
-        Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return false;
-
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, waiter.getName());
-            statement.setDouble(2, waiter.getSalary());
-            statement.setInt(3, waiter.getExperienceYears());
-            statement.setInt(4, waiter.getTablesServed());
+            statement.setString(1, VIP.getName());
+            statement.setInt(2, VIP.getAge());
+            statement.setString(3, VIP.getEmail());
+            statement.setString(4, VIP.getPreferredSize());
+            statement.setInt(5, VIP.getPoints());
+            statement.setString(6, VIP.getVipLevel());
 
             int rowsInserted = statement.executeUpdate();
             statement.close();
 
             if (rowsInserted > 0) {
-                System.out.println("✅ Waiter inserted: " + waiter.getName());
+                System.out.println("✅ VIP customer inserted: " + VIP.getName());
                 return true;
             }
-
-        } catch (SQLException e) {
-            System.out.println("❌ Insert Waiter failed!");
+        } catch (
+                SQLException e) {
             e.printStackTrace();
         } finally {
             DatabaseConnection.closeConnection(connection);
         }
-
         return false;
     }
 
-    // ========================================
-    // READ - SELECT OPERATIONS (Week 7)
-    // ========================================
-
-    /**
-     * SELECT ALL staff members
-     * @return List of Staff (Chef and Waiter objects)
-     */
-    public List<Staff> getAllStaff() {
-        List<Staff> staffList = new ArrayList<>();
-        String sql = "SELECT * FROM staff ORDER BY staff_id";
+//SELECT
+    public List<Customer> getAllCustomer() {
+        List<Customer> customerList = new ArrayList<>();
+        String sql = "SELECT * FROM customer ORDER BY customer_id";
 
         Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return staffList;
+        if (connection == null) return customerList;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Staff staff = extractStaffFromResultSet(resultSet);
-                if (staff != null) {
-                    staffList.add(staff);
+                Customer customer = extractCustomerFromResultSet(resultSet);
+                if (customer != null) {
+                    customerList.add(customer);
                 }
             }
 
             resultSet.close();
             statement.close();
 
-            System.out.println("✅ Retrieved " + staffList.size() + " staff from database");
+            System.out.println("✅ Retrieved " + customerList.size() + " customer from database");
 
         } catch (SQLException e) {
-            System.out.println("❌ Select all staff failed!");
+            System.out.println("❌ Select all customer failed!");
             e.printStackTrace();
         } finally {
             DatabaseConnection.closeConnection(connection);
         }
 
-        return staffList;
+        return customerList;
     }
-
-    /**
-     * SELECT staff by ID
-     */
-    public Staff getStaffById(int staffId) {
-        String sql = "SELECT * FROM staff WHERE staff_id = ?";
+    public Customer getCustomerById(int customerId) {
+        String sql = "SELECT * FROM customer WHERE customer_id = ?";
 
         Connection connection = DatabaseConnection.getConnection();
         if (connection == null) return null;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, staffId);
-
+            statement.setInt(1, customerId);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                Staff staff = extractStaffFromResultSet(resultSet);
+                Customer customer = extractCustomerFromResultSet(resultSet);
 
                 resultSet.close();
                 statement.close();
 
-                if (staff != null) {
-                    System.out.println("✅ Found staff with ID: " + staffId);
+                if (customer != null) {
+                    System.out.println("✅ Found customer with ID: " + customerId);
                 }
 
-                return staff;
+                return customer;
             }
 
-            System.out.println("⚠️ No staff found with ID: " + staffId);
+            System.out.println("⚠️ No customer found with ID: " + customerId);
 
             resultSet.close();
             statement.close();
@@ -223,119 +133,137 @@ public class StaffDAO {
 
         return null;
     }
-
-    /**
-     * SELECT all Chefs
-     */
-    public List<Chef> getAllChefs() {
-        List<Chef> chefs = new ArrayList<>();
-        String sql = "SELECT * FROM staff WHERE staff_type = 'CHEF' ORDER BY staff_id";
+    public List<RegularCustomer> getAllRegularCustomers() {
+        List<RegularCustomer> regularCustomers = new ArrayList<>();
+        String sql = "SELECT * FROM customer WHERE customer_type = 'Regular' ORDER BY customer_id";
 
         Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return chefs;
+        if (connection == null) return regularCustomers;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Staff staff = extractStaffFromResultSet(resultSet);
-                if (staff instanceof Chef) {
-                    chefs.add((Chef) staff);
+                Customer customer = extractCustomerFromResultSet(resultSet);
+                if (customer instanceof RegularCustomer) {
+                    regularCustomers.add((RegularCustomer) customer);
                 }
             }
 
             resultSet.close();
             statement.close();
 
-            System.out.println("✅ Retrieved " + chefs.size() + " chefs");
+            System.out.println("✅ Retrieved " + regularCustomers.size() + " Regular Customers");
 
         } catch (SQLException e) {
-            System.out.println("❌ Select chefs failed!");
+            System.out.println("❌ Select Regular Customers failed!");
             e.printStackTrace();
         } finally {
             DatabaseConnection.closeConnection(connection);
         }
 
-        return chefs;
+        return regularCustomers;
     }
-
-    /**
-     * SELECT all Waiters
-     */
-    public List<Waiter> getAllWaiters() {
-        List<Waiter> waiters = new ArrayList<>();
-        String sql = "SELECT * FROM staff WHERE staff_type = 'WAITER' ORDER BY staff_id";
-
+    public List<VIPCustomer> getAllVIPCustomers() {
+        List<VIPCustomer> VIP = new ArrayList<>();
+        String sql = "SELECT * FROM customer WHERE customer_type = 'VIP' ORDER BY customer_id";
         Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return waiters;
+        if (connection == null) return VIP;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Staff staff = extractStaffFromResultSet(resultSet);
-                if (staff instanceof Waiter) {
-                    waiters.add((Waiter) staff);
+                Customer customer = extractCustomerFromResultSet(resultSet);
+                if (customer instanceof VIPCustomer) {
+                    VIP.add((VIPCustomer) customer);
                 }
             }
 
             resultSet.close();
             statement.close();
 
-            System.out.println("✅ Retrieved " + waiters.size() + " waiters");
+            System.out.println("✅ Retrieved " + VIP.size() + " VIP customers");
 
         } catch (SQLException e) {
-            System.out.println("❌ Select waiters failed!");
+            System.out.println("❌ Select VIP customers failed!");
             e.printStackTrace();
         } finally {
             DatabaseConnection.closeConnection(connection);
         }
 
-        return waiters;
+        return VIP;
     }
 
-    // ========================================
-    // WEEK 8: UPDATE OPERATION
-    // ========================================
 
-    /**
-     * UPDATE Chef in database
-     * @param chef Chef object with updated data
-     * @return true if successful
-     */
+    //UPDATE
+    public boolean updateRegularCustomer(RegularCustomer regularCustomer) {
+        String sql = "UPDATE customer SET name = ?, age = ?, email = ?, preferred_size = ?,points = ?,join_date = ?" +
+                " WHERE customer_id = ? AND customer_type = 'Regular'";
+//name, age, email, preferred_size, points, customer_type, join_date, vip_level
+        Connection connection = DatabaseConnection.getConnection();
+        if (connection == null) return false;
 
-    // CHEF from DB
-    // CHEF set change
-    // update chef
-    public boolean updateChef(Chef chef) {
-        String sql = "UPDATE staff SET name = ?, salary = ?, experience_years = ?, specialization = ? " +
-                "WHERE staff_id = ? AND staff_type = 'CHEF'";
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, regularCustomer.getName());
+            statement.setInt(2, regularCustomer.getAge());
+            statement.setString(3, regularCustomer.getEmail());
+            statement.setString(4, regularCustomer.getPreferredSize());
+            statement.setInt(5, regularCustomer.getPoints());
+            statement.setString(6, regularCustomer.getJoinDate());
+            statement.setInt(7,regularCustomer.getCustomerId());
+
+            int rowsUpdated = statement.executeUpdate();
+            statement.close();
+
+            if (rowsUpdated > 0) {
+                System.out.println("✅ Regular Customer updated: " + regularCustomer.getName());
+                return true;
+            } else {
+                System.out.println("⚠️ No Regular Customer found with ID: " + regularCustomer.getCustomerId());
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Update Regular Customer failed!");
+            e.printStackTrace();
+        } finally {
+            DatabaseConnection.closeConnection(connection);
+        }
+
+        return false;
+    }
+    public boolean updateVIPCustomer(VIPCustomer VIP) {
+        String sql = "UPDATE customer SET name = ?, age = ?, email = ?, preferred_size = ?,points = ?, vip_level = ?" +
+                " WHERE customer_id = ? AND customer_type = 'VIP'";
 
         Connection connection = DatabaseConnection.getConnection();
         if (connection == null) return false;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, chef.getName());
-            statement.setDouble(2, chef.getSalary());
-            statement.setInt(3, chef.getExperienceYears());
-            statement.setString(4, chef.getSpecialization());
-            statement.setInt(5, chef.getStaffId());
+            statement.setString(1, VIP.getName());
+            statement.setInt(2, VIP.getAge());
+            statement.setString(3, VIP.getEmail());
+            statement.setString(4, VIP.getPreferredSize());
+            statement.setInt(5, VIP.getPoints());
+            statement.setString(6, VIP.getVipLevel());
+            statement.setInt(7,VIP.getCustomerId());
 
             int rowsUpdated = statement.executeUpdate();
             statement.close();
 
             if (rowsUpdated > 0) {
-                System.out.println("✅ Chef updated: " + chef.getName());
+                System.out.println("✅ VIP updated: " + VIP.getName());
                 return true;
             } else {
-                System.out.println("⚠️ No chef found with ID: " + chef.getStaffId());
+                System.out.println("⚠️ No VIP found with ID: " + VIP.getCustomerId());
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Update Chef failed!");
+            System.out.println("❌ Update VIP failed!");
             e.printStackTrace();
         } finally {
             DatabaseConnection.closeConnection(connection);
@@ -344,73 +272,25 @@ public class StaffDAO {
         return false;
     }
 
-    /**
-     * UPDATE Waiter in database
-     * @param waiter Waiter object with updated data
-     * @return true if successful
-     */
-    public boolean updateWaiter(Waiter waiter) {
-        String sql = "UPDATE staff SET name = ?, salary = ?, experience_years = ?, tables_served = ? " +
-                "WHERE staff_id = ? AND staff_type = 'WAITER'";
+//DELETE
+    public boolean deleteCustomer(int customerId) {
+        String sql = "DELETE FROM customer WHERE customer_id = ?";
 
         Connection connection = DatabaseConnection.getConnection();
         if (connection == null) return false;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, waiter.getName());
-            statement.setDouble(2, waiter.getSalary());
-            statement.setInt(3, waiter.getExperienceYears());
-            statement.setInt(4, waiter.getTablesServed());
-            statement.setInt(5, waiter.getStaffId());
-
-            int rowsUpdated = statement.executeUpdate();
-            statement.close();
-
-            if (rowsUpdated > 0) {
-                System.out.println("✅ Waiter updated: " + waiter.getName());
-                return true;
-            } else {
-                System.out.println("⚠️ No waiter found with ID: " + waiter.getStaffId());
-            }
-
-        } catch (SQLException e) {
-            System.out.println("❌ Update Waiter failed!");
-            e.printStackTrace();
-        } finally {
-            DatabaseConnection.closeConnection(connection);
-        }
-
-        return false;
-    }
-
-    // ========================================
-    // WEEK 8: DELETE OPERATION
-    // ========================================
-
-    /**
-     * DELETE staff by ID
-     * @param staffId ID of staff to delete
-     * @return true if successful
-     */
-    public boolean deleteStaff(int staffId) {
-        String sql = "DELETE FROM staff WHERE staff_id = ?";
-
-        Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return false;
-
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, staffId);
+            statement.setInt(1, customerId);
 
             int rowsDeleted = statement.executeUpdate();
             statement.close();
 
             if (rowsDeleted > 0) {
-                System.out.println("✅ Staff deleted (ID: " + staffId + ")");
+                System.out.println("✅ customer deleted (ID: " + customerId + ")");
                 return true;
             } else {
-                System.out.println("⚠️ No staff found with ID: " + staffId);
+                System.out.println("⚠️ No customer found with ID: " + customerId);
             }
 
         } catch (SQLException e) {
@@ -423,24 +303,14 @@ public class StaffDAO {
         return false;
     }
 
-    // ========================================
-    // WEEK 8: SEARCH BY NAME
-    // ========================================
+//SEARCH
+    public List<Customer> SearchbyName(String name) {
+        List<Customer> customerList = new ArrayList<>();
 
-    /**
-     * SEARCH staff by name (partial match, case-insensitive)
-     * Example: searchByName("mur") finds "Murat", "Murray", etc.
-     * @param name Name or partial name to search
-     * @return List of matching staff
-     */
-    public List<Staff> searchByName(String name) {
-        List<Staff> staffList = new ArrayList<>();
-
-        // ILIKE for case-insensitive search, % for partial match
-        String sql = "SELECT * FROM staff WHERE name ILIKE ? ORDER BY name";
+        String sql = "SELECT * FROM customer WHERE name ILIKE ? ORDER BY name";
 
         Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return staffList;
+        if (connection == null) return customerList;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -449,16 +319,16 @@ public class StaffDAO {
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Staff staff = extractStaffFromResultSet(resultSet);
-                if (staff != null) {
-                    staffList.add(staff);
+                Customer customer = extractCustomerFromResultSet(resultSet);
+                if (customer != null) {
+                    customerList.add(customer);
                 }
             }
 
             resultSet.close();
             statement.close();
 
-            System.out.println("✅ Found " + staffList.size() + " staff matching '" + name + "'");
+            System.out.println("✅ Found " + customerList.size() + " customer matching '" + name + "'");
 
         } catch (SQLException e) {
             System.out.println("❌ Search by name failed!");
@@ -467,170 +337,135 @@ public class StaffDAO {
             DatabaseConnection.closeConnection(connection);
         }
 
-        return staffList;
+        return customerList;
     }
+    public List<Customer> SearchBySizeRange(String minSize, String maxSize) {
+        List<Customer> customerList = new ArrayList<>();
 
-    // ========================================
-    // WEEK 8: SEARCH BY SALARY RANGE
-    // ========================================
-
-    /**
-     * SEARCH staff by salary range
-     * @param minSalary Minimum salary (inclusive)
-     * @param maxSalary Maximum salary (inclusive)
-     * @return List of staff in salary range
-     */
-    public List<Staff> searchBySalaryRange(double minSalary, double maxSalary) {
-        List<Staff> staffList = new ArrayList<>();
-
-        String sql = "SELECT * FROM staff WHERE salary BETWEEN ? AND ? ORDER BY salary DESC";
+        String sql = "SELECT * FROM customer WHERE preferred_size BETWEEN ? AND ? ORDER BY preferred_size DESC";
 
         Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return staffList;
+        if (connection == null) return customerList;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setDouble(1, minSalary);
-            statement.setDouble(2, maxSalary);
+            statement.setString(1, minSize);
+            statement.setString(2, maxSize);
 
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Staff staff = extractStaffFromResultSet(resultSet);
-                if (staff != null) {
-                    staffList.add(staff);
+                Customer customer = extractCustomerFromResultSet(resultSet);
+                if (customer != null) {
+                    customerList.add(customer);
                 }
             }
 
             resultSet.close();
             statement.close();
 
-            System.out.println("✅ Found " + staffList.size() + " staff in salary range " +
-                    minSalary + " - " + maxSalary);
+            System.out.println("✅ Found " + customerList.size() + " customer in Size range " +
+                    minSize + " - " + maxSize);
 
         } catch (SQLException e) {
-            System.out.println("❌ Search by salary failed!");
+            System.out.println("❌ Search by Size failed!");
             e.printStackTrace();
         } finally {
             DatabaseConnection.closeConnection(connection);
         }
 
-        return staffList;
+        return customerList;
     }
+    public List<Customer> SizeCustomer(String minSize) {
+        List<Customer> customerList = new ArrayList<>();
 
-    /**
-     * SEARCH staff with minimum salary
-     * @param minSalary Minimum salary
-     * @return List of staff earning at least minSalary
-     */
-    public List<Staff> searchByMinSalary(double minSalary) {
-        List<Staff> staffList = new ArrayList<>();
-
-        String sql = "SELECT * FROM staff WHERE salary >= ? ORDER BY salary DESC";
+        String sql = "SELECT * FROM customer WHERE preferred_size >= ? ORDER BY preferred_size DESC";
 
         Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return staffList;
+        if (connection == null) return customerList;
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setDouble(1, minSalary);
+            statement.setString(1, minSize);
 
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Staff staff = extractStaffFromResultSet(resultSet);
-                if (staff != null) {
-                    staffList.add(staff);
+                Customer customer = extractCustomerFromResultSet(resultSet);
+                if (customer != null) {
+                    customerList.add(customer);
                 }
             }
 
             resultSet.close();
             statement.close();
 
-            System.out.println("✅ Found " + staffList.size() + " staff earning >= " + minSalary);
+            System.out.println("✅ Found " + customerList.size() + " customer's preferred size >= " + minSize);
 
         } catch (SQLException e) {
-            System.out.println("❌ Search by min salary failed!");
+            System.out.println("❌ Search by min size failed!");
             e.printStackTrace();
         } finally {
             DatabaseConnection.closeConnection(connection);
         }
 
-        return staffList;
+        return customerList;
     }
-
-    // ========================================
-    // HELPER METHOD
-    // ========================================
-
-    /**
-     * Extract Staff object from ResultSet
-     * Creates Chef or Waiter based on staff_type
-     */
-    private Staff extractStaffFromResultSet(ResultSet resultSet) throws SQLException {
-        int staffId = resultSet.getInt("staff_id");
+    private Customer extractCustomerFromResultSet(ResultSet resultSet) throws SQLException {
+        //name = ?, age = ?, email = ?, preferred_size = ?,points = ?
+        int customerId = resultSet.getInt("customer_id");
         String name = resultSet.getString("name");
-        double salary = resultSet.getDouble("salary");
-        int experienceYears = resultSet.getInt("experience_years");
-        String staffType = resultSet.getString("staff_type");
+        int age = resultSet.getInt("age");
+        String email = resultSet.getString("email");
+        String preferred_size = resultSet.getString("preferred_size");
+        int points = resultSet.getInt("points");
+        String customerType = resultSet.getString("customer_type");
 
-        Staff staff = null;
+        Customer customer = null;
 
-        if ("CHEF".equals(staffType)) {
-            String specialization = resultSet.getString("specialization");
-            staff = new Chef(staffId, name, salary, experienceYears, specialization);
+        if ("Regular".equals(customerType)) {
+            String joindate = resultSet.getString("join_date");
+            customer = new RegularCustomer(customerId, name, age, email, preferred_size, points, joindate);
 
-        } else if ("WAITER".equals(staffType)) {
-            int tablesServed = resultSet.getInt("tables_served");
-            staff = new Waiter(staffId, name, salary, experienceYears, tablesServed);
+        } else if ("VIP".equals(customerType)) {
+            String viplevel = resultSet.getString("vip_level");
+            customer = new VIPCustomer(customerId, name, age, email, preferred_size, points, viplevel);
         }
 
-        return staff;
+        return customer;
     }
-
-    // ========================================
-    // DISPLAY METHODS
-    // ========================================
-
-    /**
-     * Display all staff in console
-     */
-    public void displayAllStaff() {
-        List<Staff> staffList = getAllStaff();
+    public void displayAllCustomer() {
+        List<Customer> customerList = getAllCustomer();
 
         System.out.println("\n========================================");
-        System.out.println("   ALL STAFF FROM DATABASE");
+        System.out.println("   ALL Customer FROM DATABASE");
         System.out.println("========================================");
 
-        if (staffList.isEmpty()) {
-            System.out.println("No staff members in database.");
+        if (customerList.isEmpty()) {
+            System.out.println("No Customer members in database.");
         } else {
-            for (int i = 0; i < staffList.size(); i++) {
-                Staff s = staffList.get(i);
+            for (int i = 0; i < customerList.size(); i++) {
+                Customer s = customerList.get(i);
                 System.out.print((i + 1) + ". ");
-                System.out.print("[" + s.getRole() + "] ");
+                System.out.print("[" + s.getCustomerType() + "] ");
                 System.out.println(s.toString());
             }
         }
 
         System.out.println("========================================\n");
     }
-
-    /**
-     * Demonstrate polymorphism with database data
-     */
     public void demonstratePolymorphism() {
-        List<Staff> staffList = getAllStaff();
+        List<Customer> customerList = getAllCustomer();
 
         System.out.println("\n========================================");
-        System.out.println("  POLYMORPHISM: Staff from Database");
+        System.out.println("  POLYMORPHISM: customer from Database");
         System.out.println("========================================");
 
-        if (staffList.isEmpty()) {
-            System.out.println("No staff to demonstrate.");
+        if (customerList.isEmpty()) {
+            System.out.println("No customer to demonstrate.");
         } else {
-            for (Staff s : staffList) {
-                s.work();  // Polymorphic call!
+            for (Customer s : customerList) {
+                s.getCustomerType();  // Polymorphic call!
             }
         }
 
