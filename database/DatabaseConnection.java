@@ -7,8 +7,7 @@ import java.sql.SQLException;
 public class DatabaseConnection {
 
     private static final String URL =
-            "jdbc:postgresql://localhost:5433/clothing_db?sslmode=disable";
-
+            "jdbc:postgresql://localhost:5433/customer_db?sslmode=disable";
     private static final String USER = "postgres";
     private static final String PASSWORD = "1234";
 

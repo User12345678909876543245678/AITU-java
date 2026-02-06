@@ -33,7 +33,7 @@ public class RegularCustomer extends Customer {
     @Override
     public String getCustomerType() { return "Regular"; }
 
-    public boolean isLongTerm() { return joinDate.startsWith("202"); }
+    public boolean isLongTerm() { return joinDate.startsWith("201"); }
 
     public void renewMembership() { System.out.println("Membership renewed for " + name); }
 

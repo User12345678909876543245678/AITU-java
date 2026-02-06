@@ -1,7 +1,7 @@
 package model;
 
 public class VIPCustomer extends Customer {
-    private String vipLevel;
+    private String vipLevel = "none";
 
     public VIPCustomer(int customerId, String name, int age, String email, String preferredSize, int points, String vipLevel) {
         super(customerId, name, age, email, preferredSize, points);
@@ -25,7 +25,12 @@ public class VIPCustomer extends Customer {
     public double getDiscount() { return 10.0 + (points / 100.0); }
 
     @Override
-    public boolean isVIP() { return true; }
+    public boolean isVIP() {
+        if (vipLevel.equals("Silver") || vipLevel.equals("Gold")){
+        return true;
+        }
+        return false;
+    }
 
     @Override
     public String getCustomerType() { return "VIP"; }
@@ -40,7 +45,6 @@ public class VIPCustomer extends Customer {
         }
         System.out.println("Upgraded to " + vipLevel + " for " + name);
     }
-
     @Override
     public String toString() {
         return "[VIPCustomer] " + name + " (ID: " + customerId + ", Age: " + age + ", Email: " + email +
