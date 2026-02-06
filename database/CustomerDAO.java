@@ -7,7 +7,7 @@ import java.util.List;
 
 public class CustomerDAO {
     //INSERT
-    public void insertRegularCustomer(RegularCustomer regularCustomer) {
+    public boolean insertRegularCustomer(RegularCustomer regularCustomer) {
         String sql = "INSERT INTO customer (name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, 'Regular', ?, NULL)";
         try (
                 Connection connection = DatabaseConnection.getConnection();
@@ -21,17 +21,15 @@ public class CustomerDAO {
             statement.setString(6, regularCustomer.getJoinDate());
 
             int rowsInserted = statement.executeUpdate();
-            statement.close();
-
             if (rowsInserted > 0) {
                 System.out.println("✅ Regular customer inserted: " + regularCustomer.getName());
+                return true;
             }
         } catch (
                 SQLException e) {
             e.printStackTrace();
-        } finally {
-            DatabaseConnection.closeConnection(connection);
         }
+        return false;
     }
     public boolean insertVIPCustomer(VIPCustomer VIP) {
         String sql = "INSERT INTO customer (name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, 'VIP', NULL, ?)";
@@ -47,7 +45,6 @@ public class CustomerDAO {
             statement.setString(6, VIP.getVipLevel());
 
             int rowsInserted = statement.executeUpdate();
-            statement.close();
 
             if (rowsInserted > 0) {
                 System.out.println("✅ VIP customer inserted: " + VIP.getName());
@@ -56,8 +53,6 @@ public class CustomerDAO {
         } catch (
                 SQLException e) {
             e.printStackTrace();
-        } finally {
-            DatabaseConnection.closeConnection(connection);
         }
         return false;
     }
@@ -67,32 +62,21 @@ public class CustomerDAO {
         List<Customer> customerList = new ArrayList<>();
         String sql = "SELECT * FROM customer ORDER BY customer_id";
 
-        Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return customerList;
-
-        try {
+        try (
+                Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery();
+            ResultSet resultSet = statement.executeQuery()
+        ) {
 
             while (resultSet.next()) {
                 Customer customer = extractCustomerFromResultSet(resultSet);
-                if (customer != null) {
-                    customerList.add(customer);
-                }
+                if (customer != null) customerList.add(customer);
             }
-
-            resultSet.close();
-            statement.close();
-
             System.out.println("✅ Retrieved " + customerList.size() + " customer from database");
-
         } catch (SQLException e) {
             System.out.println("❌ Select all customer failed!");
             e.printStackTrace();
-        } finally {
-            DatabaseConnection.closeConnection(connection);
         }
-
         return customerList;
     }
     public Customer getCustomerById(int customerId) {
@@ -196,7 +180,6 @@ public class CustomerDAO {
 
         return VIP;
     }
-
 
     //UPDATE
     public boolean updateRegularCustomer(RegularCustomer regularCustomer) {
@@ -376,7 +359,7 @@ public class CustomerDAO {
 
         return customerList;
     }
-    public List<Customer> SizeCustomer(String minSize) {
+    public List<Customer> SearchByMinSize(String minSize) {
         List<Customer> customerList = new ArrayList<>();
 
         String sql = "SELECT * FROM customer WHERE preferred_size >= ? ORDER BY preferred_size DESC";

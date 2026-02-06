@@ -3,7 +3,6 @@ package menu;
 import exception.InvalidCustomerException;
 import model.*;
 import database.*;
-import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.List;
 
@@ -45,7 +44,7 @@ public class MenuManager implements Menu {
             displayMenu();
             System.out.print("Enter your choice: ");
             try {
-                int choice = scanner.nextInt();
+                int choice = Integer.parseInt(scanner.nextLine().trim());
                 switch (choice) {
                     case 1:
                         addRegularCustomer();
@@ -75,7 +74,7 @@ public class MenuManager implements Menu {
                         SearchBySizeRange();
                         break;
                     case 10:
-                        SizeCustomer();
+                        SearchByMinSize();
                         break;
                     case 11:
                         demonstratePolymorphism();
@@ -93,11 +92,9 @@ public class MenuManager implements Menu {
 
             } catch (java.util.InputMismatchException e) {
                 System.out.println("❌ Error: Please enter a valid number!");
-                scanner.nextLine();
                 pressEnterToContinue();
             } catch (Exception e) {
                 System.out.println("❌ Error: " + e.getMessage());
-                scanner.nextLine();
                 pressEnterToContinue();
             }
         }
@@ -133,7 +130,7 @@ public class MenuManager implements Menu {
             String joinDate = scanner.nextLine().trim();
 
             RegularCustomer regularCustomer = new RegularCustomer(customerId, name, age, email, preferredSize, points, joinDate);
-            CustomerDAO.insertRegularCustomer(regularCustomer);
+            customerDAO.insertRegularCustomer(regularCustomer);
 
             System.out.println("\n✅ Regular Customer added successfully!");
         } catch (NumberFormatException e) {
@@ -166,8 +163,9 @@ public class MenuManager implements Menu {
             System.out.print("Enter VIP level (Gold/Silver): ");
             String vipLevel = scanner.nextLine().trim();
 
-            Customer VIP = new VIPCustomer(customerId, name, age, email, preferredSize, points, vipLevel);
-            CustomerDAO.insertVIPCustomer(VIP);
+            VIPCustomer vip = new VIPCustomer(customerId, name, age, email, preferredSize, points, vipLevel);
+            customerDAO.insertVIPCustomer(vip);
+
 
             System.out.println("\n✅ VIP Customer added successfully!");
         } catch (NumberFormatException e) {
@@ -178,10 +176,10 @@ public class MenuManager implements Menu {
     }
     private void viewAllCustomer() {
 
-        CustomerDAO.displayAllCustomer();
+        customerDAO.displayAllCustomer();
     }
     private void viewRegularCustomerOnly() {
-        List<RegularCustomer> regularCustomers = CustomerDAO.getAllRegularCustomers();
+        List<RegularCustomer> regularCustomers = customerDAO.getAllRegularCustomers();
 
         System.out.println("\n╔════════════════════════════════════════╗");
         System.out.println("║         Regular ONLY                    ║");
@@ -203,7 +201,7 @@ public class MenuManager implements Menu {
         }
     }
     private void viewVIPCustomersOnly() {
-        List<VIPCustomer> VIPCustomers = CustomerDAO.getAllVIPCustomers();
+        List<VIPCustomer> VIPCustomers = customerDAO.getAllVIPCustomers();
 
         System.out.println("\n╔════════════════════════════════════════╗");
         System.out.println("║         VIP ONLY                    ║");
@@ -215,7 +213,7 @@ public class MenuManager implements Menu {
             for (int i = 0; i < VIPCustomers.size(); i++) {
                 VIPCustomer VIP = VIPCustomers.get(i);
                 System.out.println((i + 1) + ". " + VIP.toString());
-                System.out.println("   Join Date: " + VIP.getVipLevel());
+                System.out.println("   VIP Level: " + VIP.getVipLevel());
                 if (VIP.isVIP()) {
                     System.out.println("This customer is VIP");
                 }
@@ -229,10 +227,9 @@ public class MenuManager implements Menu {
         System.out.print("│ Enter Customer ID to update: ");
 
         try {
-            int customerid = scanner.nextInt();
-            scanner.nextLine();
+            int customerid = Integer.parseInt(scanner.nextLine().trim());
 
-            Customer existingCustomer = CustomerDAO.getCustomerById(customerid);
+            Customer existingCustomer = customerDAO.getCustomerById(customerid);
 
             if (existingCustomer == null) {
                 System.out.println("❌ No Customer found with ID: " + customerid);
@@ -283,7 +280,7 @@ public class MenuManager implements Menu {
                 }
 
                 RegularCustomer updatedRegularCustomer = new RegularCustomer(customerid, newName, newAge, newEmail,newPSize, newPoints, newJoin);
-                CustomerDAO.updateRegularCustomer(updatedRegularCustomer);
+                customerDAO.updateRegularCustomer(updatedRegularCustomer);
 
             } else if (existingCustomer instanceof VIPCustomer) {
                 VIPCustomer VIP = (VIPCustomer) existingCustomer;
@@ -292,12 +289,10 @@ public class MenuManager implements Menu {
                 if (newVIPLevel.trim().isEmpty()) {
                     newVIPLevel = VIP.getVipLevel();
                 }
-                VIPCustomer updatedVIPCustomer = new VIPCustomer(customerid, newName, newAge, newEmail,newPSize, newPoints,newVIPLvl);
-                CustomerDAO.updateVIPCustomer(updatedVIPCustomer);
+                VIPCustomer updatedVIPCustomer = new VIPCustomer(customerid, newName, newAge, newEmail, newPSize, newPoints, newVIPLevel);
+                customerDAO.updateVIPCustomer(updatedVIPCustomer);
             }
-
             System.out.println("└────────────────────────────────────────┘");
-
         } catch (NumberFormatException e) {
             System.out.println("❌ Error: Invalid number format!");
         } catch (IllegalArgumentException e) {
@@ -334,7 +329,6 @@ public class MenuManager implements Menu {
 
         } catch (java.util.InputMismatchException e) {
             System.out.println("❌ Error: Invalid input!");
-            scanner.nextLine();
         }
     }
     private void SearchbyName() {
@@ -343,7 +337,7 @@ public class MenuManager implements Menu {
         String name = scanner.nextLine();
         System.out.println("└────────────────────────────────────────┘");
 
-        List<Customer> results = customerDAO.searchByName(name);
+        List<Customer> results = customerDAO.SearchbyName(name);
 
         displaySearchResults(results, "Search: '" + name + "'");
     }
@@ -362,13 +356,13 @@ public class MenuManager implements Menu {
             scanner.nextLine();
         }
     }
-    private void SizeCustomer() {
+    private void SearchByMinSize() {
         try {
             System.out.println("\n┌─  Customer's size ──────────────────────┐");
             System.out.print("│ Enter Customer's size: ");
             String Csize = scanner.nextLine();
             System.out.println("└────────────────────────────────────────┘");
-            List<Customer> results = customerDAO.searchBySize(Csize);
+            List<Customer> results = customerDAO.SearchByMinSize(Csize);
             displaySearchResults(results, "Customer's size: " + Csize);
 
         } catch (java.util.InputMismatchException e) {
