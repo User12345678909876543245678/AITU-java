@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CustomerDAO {
-    //INSERT
+    //INSERT - (name, age, email, preferred_size, points, customer_type, join_date, vip_level)
     public boolean insertRegularCustomer(RegularCustomer regularCustomer) {
         String sql = "INSERT INTO customer (name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, 'Regular', ?, NULL)";
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        Connection connection = DatabaseConnection.getConnection();
+        if (connection == null) return false;
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
 
             statement.setString(1, regularCustomer.getName());
             statement.setInt(2, regularCustomer.getAge());
@@ -21,6 +22,7 @@ public class CustomerDAO {
             statement.setString(6, regularCustomer.getJoinDate());
 
             int rowsInserted = statement.executeUpdate();
+            statement.close();
             if (rowsInserted > 0) {
                 System.out.println("✅ Regular customer inserted: " + regularCustomer.getName());
                 return true;
@@ -29,13 +31,18 @@ public class CustomerDAO {
                 SQLException e) {
             e.printStackTrace();
         }
+        finally {
+            DatabaseConnection.closeConnection(connection);
+        }
         return false;
     }
     public boolean insertVIPCustomer(VIPCustomer VIP) {
         String sql = "INSERT INTO customer (name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, 'VIP', NULL, ?)";
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        Connection connection = DatabaseConnection.getConnection();
+        if (connection == null) return false;
+        try {
+
+            PreparedStatement statement = connection.prepareStatement(sql);
 
             statement.setString(1, VIP.getName());
             statement.setInt(2, VIP.getAge());
@@ -45,7 +52,7 @@ public class CustomerDAO {
             statement.setString(6, VIP.getVipLevel());
 
             int rowsInserted = statement.executeUpdate();
-
+            statement.close();
             if (rowsInserted > 0) {
                 System.out.println("✅ VIP customer inserted: " + VIP.getName());
                 return true;
@@ -54,6 +61,9 @@ public class CustomerDAO {
                 SQLException e) {
             e.printStackTrace();
         }
+        finally {
+            DatabaseConnection.closeConnection(connection);
+        }
         return false;
     }
 
@@ -61,21 +71,24 @@ public class CustomerDAO {
     public List<Customer> getAllCustomer() {
         List<Customer> customerList = new ArrayList<>();
         String sql = "SELECT * FROM customer ORDER BY customer_id";
-
-        try (
-                Connection connection = DatabaseConnection.getConnection();
+        Connection connection = DatabaseConnection.getConnection();
+        if (connection == null) return customerList;
+        try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery()
-        ) {
-
+            ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Customer customer = extractCustomerFromResultSet(resultSet);
                 if (customer != null) customerList.add(customer);
             }
+            resultSet.close();
+            statement.close();
             System.out.println("✅ Retrieved " + customerList.size() + " customer from database");
         } catch (SQLException e) {
             System.out.println("❌ Select all customer failed!");
             e.printStackTrace();
+        }
+        finally {
+            DatabaseConnection.closeConnection(connection);
         }
         return customerList;
     }
@@ -114,7 +127,6 @@ public class CustomerDAO {
         } finally {
             DatabaseConnection.closeConnection(connection);
         }
-
         return null;
     }
     public List<RegularCustomer> getAllRegularCustomers() {
@@ -448,7 +460,7 @@ public class CustomerDAO {
             System.out.println("No customer to demonstrate.");
         } else {
             for (Customer s : customerList) {
-                s.getCustomerType();  // Polymorphic call!
+                System.out.println(s.getCustomerType()); // Polymorphic call!
             }
         }
 

@@ -175,7 +175,6 @@ public class MenuManager implements Menu {
         }
     }
     private void viewAllCustomer() {
-
         customerDAO.displayAllCustomer();
     }
     private void viewRegularCustomerOnly() {
