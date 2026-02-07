@@ -67,6 +67,7 @@ public class CustomerDAO {
         return false;
     }
 
+
 //SELECT
     public List<Customer> getAllCustomer() {
         List<Customer> customerList = new ArrayList<>();
@@ -91,43 +92,6 @@ public class CustomerDAO {
             DatabaseConnection.closeConnection(connection);
         }
         return customerList;
-    }
-    public Customer getCustomerById(int customerId) {
-        String sql = "SELECT * FROM customer WHERE customer_id = ?";
-
-        Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return null;
-
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, customerId);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                Customer customer = extractCustomerFromResultSet(resultSet);
-
-                resultSet.close();
-                statement.close();
-
-                if (customer != null) {
-                    System.out.println("✅ Found customer with ID: " + customerId);
-                }
-
-                return customer;
-            }
-
-            System.out.println("⚠️ No customer found with ID: " + customerId);
-
-            resultSet.close();
-            statement.close();
-
-        } catch (SQLException e) {
-            System.out.println("❌ Select by ID failed!");
-            e.printStackTrace();
-        } finally {
-            DatabaseConnection.closeConnection(connection);
-        }
-        return null;
     }
     public List<RegularCustomer> getAllRegularCustomers() {
         List<RegularCustomer> regularCustomers = new ArrayList<>();
@@ -192,12 +156,50 @@ public class CustomerDAO {
 
         return VIP;
     }
+    public Customer getCustomerById(int customerId) {
+        String sql = "SELECT * FROM customer WHERE customer_id = ?";
 
-    //UPDATE
+        Connection connection = DatabaseConnection.getConnection();
+        if (connection == null) return null;
+
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, customerId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                Customer customer = extractCustomerFromResultSet(resultSet);
+
+                resultSet.close();
+                statement.close();
+
+                if (customer != null) {
+                    System.out.println("✅ Found customer with ID: " + customerId);
+                }
+
+                return customer;
+            }
+
+            System.out.println("⚠️ No customer found with ID: " + customerId);
+
+            resultSet.close();
+            statement.close();
+
+        } catch (SQLException e) {
+            System.out.println("❌ Select by ID failed!");
+            e.printStackTrace();
+        } finally {
+            DatabaseConnection.closeConnection(connection);
+        }
+        return null;
+    }
+
+
+    //UPDATE name, age, email, preferred_size, points, customer_type, join_date, vip_level
     public boolean updateRegularCustomer(RegularCustomer regularCustomer) {
         String sql = "UPDATE customer SET name = ?, age = ?, email = ?, preferred_size = ?,points = ?,join_date = ?" +
                 " WHERE customer_id = ? AND customer_type = 'Regular'";
-//name, age, email, preferred_size, points, customer_type, join_date, vip_level
+
         Connection connection = DatabaseConnection.getConnection();
         if (connection == null) return false;
 
@@ -267,6 +269,7 @@ public class CustomerDAO {
         return false;
     }
 
+
 //DELETE
     public boolean deleteCustomer(int customerId) {
         String sql = "DELETE FROM customer WHERE customer_id = ?";
@@ -298,10 +301,10 @@ public class CustomerDAO {
         return false;
     }
 
+
 //SEARCH
     public List<Customer> SearchbyName(String name) {
         List<Customer> customerList = new ArrayList<>();
-
         String sql = "SELECT * FROM customer WHERE name ILIKE ? ORDER BY name";
 
         Connection connection = DatabaseConnection.getConnection();
@@ -309,9 +312,9 @@ public class CustomerDAO {
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, "%" + name + "%");  // % = wildcard
-
             ResultSet resultSet = statement.executeQuery();
+
+            statement.setString(1, "%" + name + "%");
 
             while (resultSet.next()) {
                 Customer customer = extractCustomerFromResultSet(resultSet);
@@ -406,6 +409,9 @@ public class CustomerDAO {
 
         return customerList;
     }
+
+
+
     private Customer extractCustomerFromResultSet(ResultSet resultSet) throws SQLException {
         //name = ?, age = ?, email = ?, preferred_size = ?,points = ?
         int customerId = resultSet.getInt("customer_id");
