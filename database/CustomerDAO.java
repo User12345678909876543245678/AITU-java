@@ -8,18 +8,18 @@ import java.util.List;
 public class CustomerDAO {
     //INSERT - (name, age, email, preferred_size, points, customer_type, join_date, vip_level)
     public boolean insertRegularCustomer(RegularCustomer regularCustomer) {
-        String sql = "INSERT INTO customer (name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, 'Regular', ?, NULL)";
+        String sql = "INSERT INTO customer (customer_id, name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, ?, 'Regular', ?, NULL)";
         Connection connection = DatabaseConnection.getConnection();
         if (connection == null) return false;
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-
-            statement.setString(1, regularCustomer.getName());
-            statement.setInt(2, regularCustomer.getAge());
-            statement.setString(3, regularCustomer.getEmail());
-            statement.setString(4, regularCustomer.getPreferredSize());
-            statement.setInt(5, regularCustomer.getPoints());
-            statement.setString(6, regularCustomer.getJoinDate());
+            statement.setInt(1, regularCustomer.getCustomerId());
+            statement.setString(2, regularCustomer.getName());
+            statement.setInt(3, regularCustomer.getAge());
+            statement.setString(4, regularCustomer.getEmail());
+            statement.setString(5, regularCustomer.getPreferredSize());
+            statement.setInt(6, regularCustomer.getPoints());
+            statement.setDate(7, java.sql.Date.valueOf(regularCustomer.getJoinDate()));
 
             int rowsInserted = statement.executeUpdate();
             statement.close();
@@ -36,20 +36,21 @@ public class CustomerDAO {
         }
         return false;
     }
+
     public boolean insertVIPCustomer(VIPCustomer VIP) {
-        String sql = "INSERT INTO customer (name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, 'VIP', NULL, ?)";
+        String sql = "INSERT INTO customer (customer_id, name, age, email, preferred_size, points, customer_type, join_date, vip_level) VALUES (?, ?, ?, ?, ?, ?, 'VIP', NULL, ?)";
         Connection connection = DatabaseConnection.getConnection();
         if (connection == null) return false;
         try {
 
             PreparedStatement statement = connection.prepareStatement(sql);
-
-            statement.setString(1, VIP.getName());
-            statement.setInt(2, VIP.getAge());
-            statement.setString(3, VIP.getEmail());
-            statement.setString(4, VIP.getPreferredSize());
-            statement.setInt(5, VIP.getPoints());
-            statement.setString(6, VIP.getVipLevel());
+            statement.setInt(1,VIP.getCustomerId());
+            statement.setString(2, VIP.getName());
+            statement.setInt(3, VIP.getAge());
+            statement.setString(4, VIP.getEmail());
+            statement.setString(5, VIP.getPreferredSize());
+            statement.setInt(6, VIP.getPoints());
+            statement.setString(7, VIP.getVipLevel());
 
             int rowsInserted = statement.executeUpdate();
             statement.close();
@@ -93,6 +94,44 @@ public class CustomerDAO {
         }
         return customerList;
     }
+    public Customer getCustomerById(int customerId) {
+        String sql = "SELECT * FROM customer WHERE customer_id = ?";
+
+        Connection connection = DatabaseConnection.getConnection();
+        if (connection == null) return null;
+
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, customerId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                Customer customer = extractCustomerFromResultSet(resultSet);
+
+                resultSet.close();
+                statement.close();
+
+                if (customer != null) {
+                    System.out.println("✅ Found customer with ID: " + customerId);
+                }
+
+                return customer;
+            }
+
+            System.out.println("⚠️ No customer found with ID: " + customerId);
+
+            resultSet.close();
+            statement.close();
+
+        } catch (SQLException e) {
+            System.out.println("❌ Select by ID failed!");
+            e.printStackTrace();
+        } finally {
+            DatabaseConnection.closeConnection(connection);
+        }
+        return null;
+    }
+
     public List<RegularCustomer> getAllRegularCustomers() {
         List<RegularCustomer> regularCustomers = new ArrayList<>();
         String sql = "SELECT * FROM customer WHERE customer_type = 'Regular' ORDER BY customer_id";
@@ -156,43 +195,7 @@ public class CustomerDAO {
 
         return VIP;
     }
-    public Customer getCustomerById(int customerId) {
-        String sql = "SELECT * FROM customer WHERE customer_id = ?";
 
-        Connection connection = DatabaseConnection.getConnection();
-        if (connection == null) return null;
-
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, customerId);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                Customer customer = extractCustomerFromResultSet(resultSet);
-
-                resultSet.close();
-                statement.close();
-
-                if (customer != null) {
-                    System.out.println("✅ Found customer with ID: " + customerId);
-                }
-
-                return customer;
-            }
-
-            System.out.println("⚠️ No customer found with ID: " + customerId);
-
-            resultSet.close();
-            statement.close();
-
-        } catch (SQLException e) {
-            System.out.println("❌ Select by ID failed!");
-            e.printStackTrace();
-        } finally {
-            DatabaseConnection.closeConnection(connection);
-        }
-        return null;
-    }
 
 
     //UPDATE name, age, email, preferred_size, points, customer_type, join_date, vip_level
@@ -210,7 +213,7 @@ public class CustomerDAO {
             statement.setString(3, regularCustomer.getEmail());
             statement.setString(4, regularCustomer.getPreferredSize());
             statement.setInt(5, regularCustomer.getPoints());
-            statement.setString(6, regularCustomer.getJoinDate());
+            statement.setDate(6, java.sql.Date.valueOf(regularCustomer.getJoinDate()));
             statement.setInt(7,regularCustomer.getCustomerId());
 
             int rowsUpdated = statement.executeUpdate();
@@ -232,6 +235,7 @@ public class CustomerDAO {
 
         return false;
     }
+
     public boolean updateVIPCustomer(VIPCustomer VIP) {
         String sql = "UPDATE customer SET name = ?, age = ?, email = ?, preferred_size = ?,points = ?, vip_level = ?" +
                 " WHERE customer_id = ? AND customer_type = 'VIP'";
@@ -312,9 +316,9 @@ public class CustomerDAO {
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, "%" + name + "%");
             ResultSet resultSet = statement.executeQuery();
 
-            statement.setString(1, "%" + name + "%");
 
             while (resultSet.next()) {
                 Customer customer = extractCustomerFromResultSet(resultSet);
@@ -374,6 +378,7 @@ public class CustomerDAO {
 
         return customerList;
     }
+
     public List<Customer> SearchByMinSize(String minSize) {
         List<Customer> customerList = new ArrayList<>();
 
@@ -425,7 +430,8 @@ public class CustomerDAO {
         Customer customer = null;
 
         if ("Regular".equals(customerType)) {
-            String joindate = resultSet.getString("join_date");
+            Date jd = resultSet.getDate("join_date");
+            String joindate = (jd == null) ? null : jd.toString(); // "YYYY-MM-DD"
             customer = new RegularCustomer(customerId, name, age, email, preferred_size, points, joindate);
 
         } else if ("VIP".equals(customerType)) {
