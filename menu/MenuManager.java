@@ -129,6 +129,7 @@ public class MenuManager implements Menu {
             System.out.print("Enter join date (YYYY-MM-DD): ");
             String joinDate = scanner.nextLine().trim();
 
+
             RegularCustomer regularCustomer = new RegularCustomer(customerId, name, age, email, preferredSize, points, joinDate);
             customerDAO.insertRegularCustomer(regularCustomer);
 
@@ -139,95 +140,12 @@ public class MenuManager implements Menu {
             System.out.println("Error: " + e.getMessage());
         }
     }
-    private void addVIPCustomer() {
-        System.out.println("\n--- ADD VIP CUSTOMER ---");
-        try {
-            System.out.print("Enter customer ID: ");
-            int customerId = Integer.parseInt(scanner.nextLine().trim());
-
-            System.out.print("Enter name: ");
-            String name = scanner.nextLine().trim();
-
-            System.out.print("Enter age: ");
-            int age = Integer.parseInt(scanner.nextLine().trim());
-
-            System.out.print("Enter email: ");
-            String email = scanner.nextLine().trim();
-
-            System.out.print("Enter preferred size: ");
-            String preferredSize = scanner.nextLine().trim();
-
-            System.out.print("Enter points: ");
-            int points = Integer.parseInt(scanner.nextLine().trim());
-
-            System.out.print("Enter VIP level (Gold/Silver): ");
-            String vipLevel = scanner.nextLine().trim();
-
-            VIPCustomer vip = new VIPCustomer(customerId, name, age, email, preferredSize, points, vipLevel);
-            customerDAO.insertVIPCustomer(vip);
-
-
-            System.out.println("\n✅ VIP Customer added successfully!");
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Invalid number format - " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-    private void viewAllCustomer() {
-        customerDAO.displayAllCustomer();
-    }
-    private void viewRegularCustomerOnly() {
-        List<RegularCustomer> regularCustomers = customerDAO.getAllRegularCustomers();
-
-        System.out.println("\n╔════════════════════════════════════════╗");
-        System.out.println("║         Regular ONLY                    ║");
-        System.out.println("╚════════════════════════════════════════╝");
-
-        if (regularCustomers.isEmpty()) {
-            System.out.println("📭 No regulars in database.");
-        } else {
-            for (int i = 0; i < regularCustomers.size(); i++) {
-                RegularCustomer regular = regularCustomers.get(i);
-                System.out.println((i + 1) + ". " + regular.toString());
-                System.out.println("   Join Date: " + regular.getJoinDate());
-                if (regular.isLongTerm()) {
-                    System.out.println("   ⭐ MASTER Regalar (7+ years)");
-                }
-                System.out.println();
-            }
-            System.out.println("Total Regulars: " + regularCustomers.size());
-        }
-    }
-    private void viewVIPCustomersOnly() {
-        List<VIPCustomer> VIPCustomers = customerDAO.getAllVIPCustomers();
-
-        System.out.println("\n╔════════════════════════════════════════╗");
-        System.out.println("║         VIP ONLY                    ║");
-        System.out.println("╚════════════════════════════════════════╝");
-
-        if (VIPCustomers.isEmpty()) {
-            System.out.println("📭 No VIP customers in database.");
-        } else {
-            for (int i = 0; i < VIPCustomers.size(); i++) {
-                VIPCustomer VIP = VIPCustomers.get(i);
-                System.out.println((i + 1) + ". " + VIP.toString());
-                System.out.println("   VIP Level: " + VIP.getVipLevel());
-                if (VIP.isVIP()) {
-                    System.out.println("This customer is VIP");
-                }
-                System.out.println();
-            }
-            System.out.println("Total Regulars: " + VIPCustomers.size());
-        }
-    }
     private void updateCustomer() {
         System.out.println("\n┌─ UPDATE Customer ─────────────────────────┐");
         System.out.print("│ Enter Customer ID to update: ");
 
         try {
             int customerid = Integer.parseInt(scanner.nextLine().trim());
-
             Customer existingCustomer = customerDAO.getCustomerById(customerid);
 
             if (existingCustomer == null) {
@@ -243,12 +161,14 @@ public class MenuManager implements Menu {
             System.out.println("│ (Press Enter to keep current value)   │");
 
             System.out.print("│ New Name [" + existingCustomer.getName() + "]: ");
+
             String newName = scanner.nextLine();
             if (newName.trim().isEmpty()) {
                 newName = existingCustomer.getName();
             }
 
             System.out.print("│ New Age [" + existingCustomer.getAge() + "]: ");
+
             String AgeInput = scanner.nextLine();
             int newAge = AgeInput.trim().isEmpty() ?
                     existingCustomer.getAge() : Integer.parseInt(AgeInput);
@@ -257,7 +177,7 @@ public class MenuManager implements Menu {
             String newEmail = scanner.nextLine();
             if (newEmail.trim().isEmpty()){
                 newEmail = existingCustomer.getEmail();
-                }
+            }
 
             System.out.print("│ New Preferred Size [" + existingCustomer.getPreferredSize() + "]: ");
             String newPSize = scanner.nextLine();
@@ -273,6 +193,7 @@ public class MenuManager implements Menu {
             if (existingCustomer instanceof RegularCustomer) {
                 RegularCustomer regularCustomer = (RegularCustomer) existingCustomer;
                 System.out.print("│ New Join Date [" + regularCustomer.getJoinDate() + "]: ");
+
                 String newJoin = scanner.nextLine();
                 if (newJoin.trim().isEmpty()) {
                     newJoin = regularCustomer.getJoinDate();
@@ -330,6 +251,9 @@ public class MenuManager implements Menu {
             System.out.println("❌ Error: Invalid input!");
         }
     }
+    private void viewAllCustomer() {
+        customerDAO.displayAllCustomer();
+    }
     private void SearchbyName() {
         System.out.println("\n┌─ SEARCH BY NAME ───────────────────────┐");
         System.out.print("│ Enter name to search: ");
@@ -339,6 +263,90 @@ public class MenuManager implements Menu {
         List<Customer> results = customerDAO.SearchbyName(name);
 
         displaySearchResults(results, "Search: '" + name + "'");
+    }
+    private void demonstratePolymorphism() {
+        customerDAO.demonstratePolymorphism();
+    }
+
+
+    private void addVIPCustomer() {
+        System.out.println("\n--- ADD VIP CUSTOMER ---");
+        try {
+            System.out.print("Enter customer ID: ");
+            int customerId = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("Enter name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("Enter age: ");
+            int age = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("Enter email: ");
+            String email = scanner.nextLine().trim();
+
+            System.out.print("Enter preferred size: ");
+            String preferredSize = scanner.nextLine().trim();
+
+            System.out.print("Enter points: ");
+            int points = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("Enter VIP level (Gold/Silver): ");
+            String vipLevel = scanner.nextLine().trim();
+
+            VIPCustomer vip = new VIPCustomer(customerId, name, age, email, preferredSize, points, vipLevel);
+            customerDAO.insertVIPCustomer(vip);
+
+
+            System.out.println("\n✅ VIP Customer added successfully!");
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid number format - " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+    private void viewRegularCustomerOnly() {
+        List<RegularCustomer> regularCustomers = customerDAO.getAllRegularCustomers();
+
+        System.out.println("\n╔════════════════════════════════════════╗");
+        System.out.println("║         Regular ONLY                    ║");
+        System.out.println("╚════════════════════════════════════════╝");
+
+        if (regularCustomers.isEmpty()) {
+            System.out.println("📭 No regulars in database.");
+        } else {
+            for (int i = 0; i < regularCustomers.size(); i++) {
+                RegularCustomer regular = regularCustomers.get(i);
+                System.out.println((i + 1) + ". " + regular.toString());
+                System.out.println("   Join Date: " + regular.getJoinDate());
+                if (regular.isLongTerm()) {
+                    System.out.println("   ⭐ MASTER Regalar (7+ years)");
+                }
+                System.out.println();
+            }
+            System.out.println("Total Regulars: " + regularCustomers.size());
+        }
+    }
+    private void viewVIPCustomersOnly() {
+        List<VIPCustomer> VIPCustomers = customerDAO.getAllVIPCustomers();
+
+        System.out.println("\n╔════════════════════════════════════════╗");
+        System.out.println("║         VIP ONLY                    ║");
+        System.out.println("╚════════════════════════════════════════╝");
+
+        if (VIPCustomers.isEmpty()) {
+            System.out.println("📭 No VIP customers in database.");
+        } else {
+            for (int i = 0; i < VIPCustomers.size(); i++) {
+                VIPCustomer VIP = VIPCustomers.get(i);
+                System.out.println((i + 1) + ". " + VIP.toString());
+                System.out.println("   VIP Level: " + VIP.getVipLevel());
+                if (VIP.isVIP()) {
+                    System.out.println("This customer is VIP");
+                }
+                System.out.println();
+            }
+            System.out.println("Total Regulars: " + VIPCustomers.size());
+        }
     }
     private void SearchBySizeRange() {
         try {
@@ -388,9 +396,6 @@ public class MenuManager implements Menu {
             System.out.println("─────────────────────────────────────────");
             System.out.println("Total Results: " + results.size());
         }
-    }
-    private void demonstratePolymorphism() {
-        customerDAO.demonstratePolymorphism();
     }
     private void pressEnterToContinue() {
         System.out.println("\n[Press Enter to continue...]");
